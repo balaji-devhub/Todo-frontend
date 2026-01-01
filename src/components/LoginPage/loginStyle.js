@@ -116,3 +116,7 @@ export const LoginButton = styled.button`
     padding: 12px 32px;
   }
 `
+export const Error = styled.p`
+  color: red;
+  margin-top: 25px;
+`

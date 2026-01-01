@@ -5,11 +5,13 @@ import {
   LogoWrapper,
   NavList,
   NavItem,
-  AddAccountButton
+  AddAccountButton,
+  ProfileIcon
 } from './SidebarStyle.js'
+import { Link } from 'react-router-dom'
 
 const Sidebar = () => {
-  const menuItems = ['ALL', 'Important', 'Life']
+  const menuItems = ['ALL', 'Important', 'Learning', 'Life']
 
   return (
     <SidebarContainer>
@@ -23,7 +25,9 @@ const Sidebar = () => {
         ))}
       </NavList>
 
-      <AddAccountButton>Add Account</AddAccountButton>
+      <AddAccountButton to="/user/register">
+        Add Account <ProfileIcon />
+      </AddAccountButton>
     </SidebarContainer>
   )
 }

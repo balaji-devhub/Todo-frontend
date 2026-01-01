@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { VscAccount } from 'react-icons/vsc'
 
 export const SidebarContainer = styled.div`
   box-sizing: border-box;
@@ -14,7 +16,7 @@ export const SidebarContainer = styled.div`
   top: 0;
   z-index: 100;
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     display: none;
   }
 `
@@ -27,7 +29,8 @@ export const LogoWrapper = styled.div`
 `
 
 export const LogoText = styled.h2`
-  font-family: 'Google Sans', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: 2px;
@@ -35,7 +38,6 @@ export const LogoText = styled.h2`
   color: #000;
   white-space: nowrap;
   overflow: hidden;
- 
 `
 
 export const NavList = styled.ul`
@@ -54,34 +56,53 @@ export const NavItem = styled.li`
   font-size: 15px;
   font-weight: 500;
   padding: 12px 16px;
-  color: #5f6368; /* Use Google's standard grey for better readability */
+  color: #5f6368;
   cursor: pointer;
   border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease,
+    box-shadow 0.2s ease;
   letter-spacing: 0.3px;
 
   &:hover {
     background-color: #f1f3f4;
     color: #000;
-    padding-left: 20px; /* Instead of translateX, increase padding for a smoother look */
+    padding-left: 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
   }
 `
 
-export const AddAccountButton = styled.button`
+export const AddAccountButton = styled(Link)`
   width: 100%;
-  padding: 16px;
+  padding: 14px;
+  border: none;
   background-color: #000;
   color: #fff;
-  border: none;
-  border-radius: 16px; /* Slightly more rounded for modern feel */
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
+  margin-right: 10px;
+  gap: 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
   cursor: pointer;
-  margin-top: auto;
-
-  transition: background-color 0.2s ease;
-
+  transition: all 0.2s ease;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   &:hover {
-    background-color: #333; /* Darker grey instead of opacity for cleaner UI */
+    background-color: #222;
+    transform: translateY(-1px);
   }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (min-width: 480px) {
+    width: auto;
+    padding: 12px 32px;
+  }
+`
+export const ProfileIcon = styled(VscAccount)`
+  margin-left: 10px;
+  line-height: 1px;
 `
