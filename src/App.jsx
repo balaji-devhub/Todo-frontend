@@ -1,129 +1,67 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Cookies from 'js-cookie'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import { ClipLoader } from 'react-spinners'
 
 import Sidebar from './components/Sidebar'
-import AnimatedMenu from './components/Dropdown/Dropdown'
 import TodoItem from './components/TodoItem/TodoItem'
-import { TailSpin } from 'react-loader-spinner'
 
 import {
   ContentContainer,
   HeaderTitle,
   TodoContainer,
+  TargetIcon,
+  TargetFont,
   InputRow,
+  TargetContainer,
   ProfileIcon,
   TaskInput,
-  Loader,
   AddButton,
   HeaderContainer,
   LogoutButton,
   ProfileSection
 } from './AppStyle'
 
+const API_BASE_URL = 'https://todo-backend-production-a5b2.up.railway.app/todo'
+
 const App = () => {
   const navigate = useNavigate()
+
   const [todos, setTodos] = useState([])
-  const [loading, setLoading] = useState(true) // Start with loading true
-
-  // todos useState section
+  const [loading, setLoading] = useState(false)
   const [todoTitle, setTodoTitle] = useState('')
-  const [tag, setTag] = useState('ALL')
+  const [tempId, setTempId] = useState(0) // ✅ temp id counter
+  const [adding, setAdding] = useState(false)
 
-  const [todoStatus, setTodoStatus] = useState(false)
+  /* ---------- Logout ---------- */
+  const handleLogout = useCallback(() => {
+    Cookies.remove('jwt_token')
+    navigate('/user/login', { replace: true })
+  }, [navigate])
 
-  const tagRequest = value => {
-    setTag(value)
-  }
-
-  const TodoAddRequest = async () => {
-    const token = Cookies.get('jwt_token')
-    const newTodo = {
-      todoTitle,
-      tag,
-      isCompleted: false
-    }
-    console.log(todoTitle)
-    console.log(tag)
-    const url = 'https://todo-backend-4-v3q0.onrender.com/todo'
-    const option = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(newTodo)
-    }
-    const response = await fetch(url, option)
-    getUserTodo()
-    const data = await response.json()
-    console.log(data)
-    console.log(response)
-  }
-
-  const TodoStatusUpdate = async (todoId, status) => {
-    //setTodoStatus(status)
-    const todo = {
-      isCompleted: status
-    }
-    const token = Cookies.get('jwt_token')
-    const url = `https://todo-backend-4-v3q0.onrender.com/todo/${todoId}`
-    const option = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(todo)
-    }
-    const response = await fetch(url, option)
-    const data = await response.json()
-    getUserTodo()
-  }
-
-  const deleteRequest = async todoId => {
-    const token = Cookies.get('jwt_token')
-    const url = `https://todo-backend-4-v3q0.onrender.com/todo/${todoId}`
-    const option = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      }
-    }
-    const response = await fetch(url, option)
-    const data = await response.json()
-    getUserTodo()
-  }
-
+  /* ---------- Fetch Todos ---------- */
   const getUserTodo = async () => {
-    const token = Cookies.get('jwt_token')
+    setLoading(true)
 
-    // 1. Check if token exists before fetching
+    const token = Cookies.get('jwt_token')
     if (!token) {
-      navigate('/user/login', { replace: true })
-      return
+      setLoading(false)
+      return handleLogout()
     }
 
     try {
-      setLoading(true)
-      const response = await fetch('https://todo-backend-4-v3q0.onrender.com/todo', {
+      const response = await fetch(API_BASE_URL, {
         method: 'GET',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         }
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        // 2. Map the data correctly (ensure backend returns an array)
-        setTodos(data.todos || data)
-        console.log(data)
-      } else {
-        console.error('Failed to fetch todos')
-      }
+      const data = await response.json()
+      setTodos(data)
     } catch (error) {
-      console.error('Network error:', error)
+      console.error(error)
     } finally {
       setLoading(false)
     }
@@ -133,51 +71,185 @@ const App = () => {
     getUserTodo()
   }, [])
 
-  const handleLogout = () => {
-    Cookies.remove('jwt_token')
-    navigate('/user/login', { replace: true })
+  /* ---------- Add Todo ---------- */
+  const TodoAddRequest = async () => {
+    if (adding) return // 🚫 block rapid clicks
+
+    const token = Cookies.get('jwt_token')
+    if (!token) return handleLogout()
+    if (!todoTitle.trim()) return
+
+    setAdding(true)
+
+    const optimisticTodo = {
+      _id: `temp-${tempId}`,
+      todoTitle,
+      tag: 'ALL',
+      isCompleted: false
+    }
+
+    setTodos(prev => [...prev, optimisticTodo])
+    setTempId(prev => prev + 1)
+    setTodoTitle('')
+
+    try {
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          todoTitle: todoTitle.trim(),
+          tag: 'ALL'
+        })
+      })
+
+      if (!response.ok) throw new Error()
+
+      await response.json()
+      getUserTodo() // sync with DB
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setAdding(false) // ✅ unlock
+    }
   }
+
+  /* ---------- Update Status ---------- */
+  const TodoStatusUpdate = async (todoId, status) => {
+    if (!todoId) return
+
+    const token = Cookies.get('jwt_token')
+    if (!token) return handleLogout()
+
+    let rollback
+    setTodos(prev => {
+      rollback = prev
+      return prev.map(t => (t._id === todoId ? { ...t, isCompleted: status } : t))
+    })
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/${todoId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ isCompleted: status })
+      })
+      if (!response.ok) throw new Error()
+    } catch {
+      setTodos(rollback)
+    }
+  }
+
+  /* ---------- Delete Todo ---------- */
+  const deleteRequest = async todoId => {
+    if (!todoId) return
+
+    const token = Cookies.get('jwt_token')
+    if (!token) return handleLogout()
+
+    let rollback
+    setTodos(prev => {
+      rollback = prev
+      return prev.filter(t => t._id !== todoId)
+    })
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/${todoId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!response.ok) throw new Error()
+    } catch {
+      setTodos(rollback)
+    }
+  }
+
+  /* ---------- Edit Todo ---------- */
+  const editTodoRequest = async (todoId, newTitle) => {
+    if (!todoId || !newTitle.trim()) return
+
+    const token = Cookies.get('jwt_token')
+    if (!token) return handleLogout()
+
+    let rollback
+    setTodos(prev => {
+      rollback = prev
+      return prev.map(t => (t._id === todoId ? { ...t, todoTitle: newTitle } : t))
+    })
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/${todoId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ todoTitle: newTitle })
+      })
+      if (!response.ok) throw new Error()
+    } catch {
+      setTodos(rollback)
+    }
+  }
+
+  /* ---------- Progress ---------- */
+  const completedTodos = todos.filter(t => t.isCompleted).length
+  const progressPercent = todos.length ? Math.round((completedTodos / todos.length) * 100) : 0
 
   return (
     <>
-      <Sidebar />
+      <Sidebar
+        progressPercent={progressPercent}
+        totalTodos={todos.length}
+        completedTodos={completedTodos}
+      />
+
       <ContentContainer>
         <HeaderContainer>
-          <HeaderTitle>Todo</HeaderTitle>
+          <HeaderTitle>Todo List</HeaderTitle>
           <ProfileSection>
-            <ProfileIcon />
+            <TargetContainer>
+              <TargetIcon />
+              <TargetFont>{todos.length}</TargetFont>
+            </TargetContainer>
+            <Link to="/user/register">
+              <ProfileIcon />
+            </Link>
             <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
           </ProfileSection>
         </HeaderContainer>
 
         <InputRow>
-          <TaskInput placeholder="Add a task..." onChange={e => setTodoTitle(e.target.value)} />
-          <AnimatedMenu tagRequest={tagRequest} />
-          <AddButton onClick={() => TodoAddRequest()}>Add</AddButton>
+          <TaskInput
+            placeholder="What needs to be done?"
+            value={todoTitle}
+            onChange={e => setTodoTitle(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && TodoAddRequest()}
+          />
+          <AddButton onClick={TodoAddRequest}>Add Task</AddButton>
         </InputRow>
 
         <TodoContainer>
           {loading ? (
-            <Loader>
-              <TailSpin
-                height="40"
-                width="40"
-                color="#000000"
-                ariaLabel="tail-spin-loading"
-                visible={loading}
-              />
-            </Loader>
+            <div style={{ textAlign: 'center', marginTop: 20 }}>
+              <ClipLoader />
+            </div>
           ) : todos.length === 0 ? (
-            <p>No todos found</p>
+            <p style={{ textAlign: 'center', color: '#666' }}>No tasks found. Add one above!</p>
           ) : (
-            todos.map(each => (
+            todos.map(todo => (
               <TodoItem
-                key={each._id}
-                todoId={each._id}
-                todo={each.todoTitle}
-                completed={each.isCompleted}
+                key={todo._id}
+                todoId={todo._id}
+                todo={todo.todoTitle}
+                completed={todo.isCompleted}
                 TodoStatusUpdate={TodoStatusUpdate}
                 deleteRequest={deleteRequest}
+                editTodoRequest={editTodoRequest}
               />
             ))
           )}

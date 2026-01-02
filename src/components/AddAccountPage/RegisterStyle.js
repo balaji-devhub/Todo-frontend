@@ -1,4 +1,5 @@
 import styled, { keyframes } from 'styled-components'
+import { Link } from 'react-router-dom'
 
 // Simple and good entrance animation
 const fadeInUp = keyframes`
@@ -10,6 +11,18 @@ const fadeInUp = keyframes`
     opacity: 1;
     transform: translateY(0);
   }
+`
+export const LogContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`
+
+export const Preventer = styled(Link)`
+  text-align: left;
+  cursor: pointer;
+  color: #000;
 `
 
 export const RegisterPageContainer = styled.div`

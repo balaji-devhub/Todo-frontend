@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { InfinitySpin } from 'react-loader-spinner'
 
 import {
   RegisterPageContainer,
@@ -6,25 +8,71 @@ import {
   Title,
   Label,
   Input,
+  Preventer,
   ButtonWrapper,
-  RegisterButton
+  RegisterButton,
+  LogContainer
 } from './RegisterStyle'
 
+const API_URL = 'https://todo-backend-production-a5b2.up.railway.app/user/register'
+
 const Register = () => {
+  const navigate = useNavigate()
+
   const [formData, setFormData] = useState({
     username: '',
     useremail: '',
     password: ''
   })
 
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
   const handleChange = event => {
     const { name, value } = event.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = event => {
-    event.preventDefault()
-    console.log(formData)
+  const handleRegisterClick = async () => {
+    if (loading) return
+
+    // 1. Check if all fields are filled
+    if (!formData.username || !formData.useremail || !formData.password) {
+      setError('Please fill in all fields.')
+      return
+    }
+
+    // 2. PASSWORD VALIDATION: Must be greater than 8 characters
+    if (formData.password.length <= 8) {
+      setError('Password must be greater than 8 characters.')
+      return
+    }
+
+    setError('')
+    setLoading(true)
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed.')
+      }
+
+      alert('Registration Successful!')
+      navigate('/user/login')
+    } catch (err) {
+      setError(err.message || 'Server error. Try again later.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -32,38 +80,57 @@ const Register = () => {
       <RegisterCardContainer>
         <Title>Register</Title>
 
-        <form onSubmit={handleSubmit}>
-          <Label>USERNAME</Label>
-          <Input
-            type="text"
-            name="username"
-            placeholder="Enter the username"
-            value={formData.username}
-            onChange={handleChange}
-          />
+        <Label htmlFor="username">USERNAME</Label>
+        <Input
+          id="username"
+          type="text"
+          name="username"
+          placeholder="Enter the username"
+          value={formData.username}
+          onChange={handleChange}
+          disabled={loading}
+        />
 
-          <Label>EMAIL</Label>
-          <Input
-            type="email"
-            name="useremail"
-            placeholder="Enter the email"
-            value={formData.useremail}
-            onChange={handleChange}
-          />
+        <Label htmlFor="email">EMAIL</Label>
+        <Input
+          id="email"
+          type="email"
+          name="useremail"
+          placeholder="Enter the email"
+          value={formData.useremail}
+          onChange={handleChange}
+          disabled={loading}
+        />
 
-          <Label>PASSWORD</Label>
-          <Input
-            type="password"
-            name="password"
-            placeholder="Enter the password"
-            value={formData.password}
-            onChange={handleChange}
-          />
+        <Label htmlFor="password">PASSWORD</Label>
+        <Input
+          id="password"
+          type="password"
+          name="password"
+          placeholder="Enter the password (min 9 chars)"
+          value={formData.password}
+          onChange={handleChange}
+          disabled={loading}
+        />
 
-          <ButtonWrapper>
-            <RegisterButton type="submit">Register</RegisterButton>
-          </ButtonWrapper>
-        </form>
+        {error && (
+          <p style={{ color: '#ff4d4d', fontSize: '14px', marginTop: '10px', textAlign: 'center' }}>
+            {error}
+          </p>
+        )}
+
+        <ButtonWrapper>
+          {loading ? (
+            <InfinitySpin width="120" color="#4A90E2" />
+          ) : (
+            <LogContainer>
+              <Preventer to="/user/login">Have account?</Preventer>
+              <RegisterButton type="button" onClick={handleRegisterClick}>
+                Register
+              </RegisterButton>
+            </LogContainer>
+          )}
+        </ButtonWrapper>
       </RegisterCardContainer>
     </RegisterPageContainer>
   )

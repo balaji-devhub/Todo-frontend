@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { VscAccount } from 'react-icons/vsc'
+import { GiTargetShot } from 'react-icons/gi'
+
+export const Logo = styled(GiTargetShot)`
+  font-size: 80px;
+`
 
 export const SidebarContainer = styled.div`
   box-sizing: border-box;
@@ -23,7 +28,7 @@ export const SidebarContainer = styled.div`
 
 export const LogoWrapper = styled.div`
   display: flex;
-  justify-content: center; /* Changed to center for better visual balance */
+  justify-content: center;
   margin-bottom: 48px;
   width: 100%;
 `
@@ -46,8 +51,8 @@ export const NavList = styled.ul`
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Better than margins for consistent spacing */
-  justify-content: flex-start; /* Items start from top, button stays at bottom */
+  gap: 8px;
+  justify-content: flex-start;
   flex-grow: 1;
 `
 
@@ -72,6 +77,8 @@ export const NavItem = styled.li`
 `
 
 export const AddAccountButton = styled(Link)`
+  margin-top: auto; /* ✅ pushes button to bottom */
+
   width: 100%;
   padding: 14px;
   border: none;
@@ -88,6 +95,7 @@ export const AddAccountButton = styled(Link)`
   transition: all 0.2s ease;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
     Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
   &:hover {
     background-color: #222;
     transform: translateY(-1px);
@@ -102,7 +110,45 @@ export const AddAccountButton = styled(Link)`
     padding: 12px 32px;
   }
 `
+
 export const ProfileIcon = styled(VscAccount)`
   margin-left: 10px;
   line-height: 1px;
+`
+
+export const StreakBox = styled.div`
+  margin: 30px 0;
+  padding: 16px;
+  background: #f9fafc;
+  border-radius: 14px;
+`
+
+export const StreakHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+`
+
+export const ProgressBar = styled.div`
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+`
+
+export const ProgressFill = styled.div`
+  height: 100%;
+  background: linear-gradient(90deg, #000, #555);
+  border-radius: 10px;
+  transition: width 0.4s ease-in-out;
+`
+
+export const ProgressText = styled.p`
+  margin-top: 8px;
+  font-size: 12px;
+  text-align: center;
+  color: #555;
 `

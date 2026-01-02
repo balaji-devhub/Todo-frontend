@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 export const LoginPageContainer = styled.div`
@@ -119,4 +120,16 @@ export const LoginButton = styled.button`
 export const Error = styled.p`
   color: red;
   margin-top: 25px;
+`
+export const LogContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`
+
+export const Preventer = styled(Link)`
+  text-align: left;
+  cursor: pointer;
+  color: #000;
 `

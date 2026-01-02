@@ -17,7 +17,7 @@ export const TodoItemContainer = styled.li`
   border-radius: 20px;
   padding: 16px 28px;
   margin-bottom: 12px;
-
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -125,4 +125,13 @@ export const IconButton = styled.button`
   @media (max-width: 480px) {
     padding: 4px;
   }
+`
+
+export const EditInput = styled.input`
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  background: transparent;
+  border-bottom: 1px solid #ccc;
 `

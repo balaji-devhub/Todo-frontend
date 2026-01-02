@@ -10,7 +10,9 @@ import {
   Label,
   InputContainer,
   Error,
-  ButtonWrapper
+  ButtonWrapper,
+  LogContainer,
+  Preventer
 } from './loginStyle'
 
 const LoginPage = () => {
@@ -123,7 +125,10 @@ const LoginPage = () => {
           {loading ? (
             <InfinitySpin width="120" color="#000" />
           ) : (
-            <LoginButton type="submit">Login</LoginButton>
+            <LogContainer>
+              <Preventer to="/user/register">New User ?</Preventer>
+              <LoginButton type="submit">Login</LoginButton>
+            </LogContainer>
           )}
         </ButtonWrapper>
 

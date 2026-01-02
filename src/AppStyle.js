@@ -1,6 +1,25 @@
 import styled from 'styled-components'
 import { PiUserCircleLight } from 'react-icons/pi'
 import { LuLogOut } from 'react-icons/lu'
+import { GiTargetShot } from 'react-icons/gi'
+
+export const TargetContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`
+
+export const TargetIcon = styled(GiTargetShot)`
+  font-size: 28px;
+  cursor: pointer;
+`
+
+export const TargetFont = styled.p`
+  font-size: 22px;
+  cursor: pointer;
+  margin-right: 5px;
+  font-weight: bold;
+`
 
 export const ProfileIcon = styled(PiUserCircleLight)`
   font-size: 28px;
