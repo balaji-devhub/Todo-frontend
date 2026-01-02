@@ -14,7 +14,7 @@ import {
   LogContainer
 } from './RegisterStyle'
 
-const API_URL = 'https://todo-backend-production-a5b2.up.railway.app/user/register'
+const API_URL = 'todo-backend-production-0a9b.up.railway.app/user/register'
 
 const Register = () => {
   const navigate = useNavigate()
